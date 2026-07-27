@@ -1,0 +1,121 @@
+[project]
+name = "scrapegraph-100k-paper"
+version = "0.1.0"
+description = "Add your description here"
+authors = [
+    {name = "Marco Vinciguerra", email = "marco@scrapegraphai.com"},
+    {name = "Francesco Saverio Zuppichini", email = "francesco@scrapegraphai.com"},
+    {name = "William Brach", email = "william.brach@stuba.sk"},
+    {name = "Lorenzo Padoan", email = "lorenzo@scrapegraphai.com"},
+]
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "datasets",
+    "jsonschema-rs",
+    "matplotlib",
+    "modal",
+    "openai",
+    "orjson",
+    "pandas",
+    "peft",
+    "pyarrow",
+    "python-dotenv",
+    "sacrebleu",
+    "scipy",
+    "seaborn",
+    "tenacity",
+    "transformers",
+    "tqdm",
+    "trl",
+    "unsloth",
+    "unsloth-zoo",
+    "wandb",
+    "weave",
+    "gradio>=6.5.1",
+    "trafilatura>=2.0.0",
+    "fsspec>=2025.9.0",
+    "numpy>=2.4.2",
+    "llama-cpp-python>=0.3.16",
+    "litellm>=1.93.0",
+    "tldextract>=5.3.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "black",
+    "ipykernel",
+    "ruff",
+    "ty",
+]
+
+[tool.ruff]
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+    "models.py"
+]
+
+line-length = 88
+target-version = "py312"
+
+[tool.ruff.lint]
+select = [
+    "E",
+    "W",
+    "F",
+    "I",
+    "C",
+    "B",
+    "G",
+    "SIM1",
+    "PLE",
+    "N802", "N803", "N815", "N816","N806",
+    "C901",
+    "UP",
+    "PLR0915"
+]
+ignore = [
+    "E501",
+    "B008",
+    "C901",
+    "G004",
+    "ANN003",
+    "B904",
+    "G201"
+]
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+fixable = ["A", "B", "C", "D", "E", "F", "G", "I", "N", "Q", "S", "T", "W", "ANN", "ARG", "BLE", "COM", "DJ", "DTZ", "EM", "ERA", "EXE", "FBT", "ICN", "INP", "ISC", "NPY", "PD", "PGH", "PIE", "PL", "PT", "PTH", "PYI", "RET", "RSE", "RUF", "SIM", "SLF", "TCH", "TID", "TRY", "UP", "YTT"]
+unfixable = []
+
+[tool.ruff.lint.pylint]
+max-statements = 60
+
+[tool.ruff.lint.mccabe]
+max-complexity = 10
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
+
+[tool.ruff.lint.isort]
+known-third-party = ["fastapi", "pydantic", "starlette"]
