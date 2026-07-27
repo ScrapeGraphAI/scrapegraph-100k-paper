@@ -2,45 +2,63 @@
   <img src="sgai-100k-banner.png" alt="ScrapeGraphAI Logo"/>
 </p>
 
-<h1 align="center">🕷️ ScrapeGraphAI-100k Dataset</h1>
+<h1 align="center">🕷️ ScrapeGraphAI-100k</h1>
 
 <p align="center">
   <a href="https://huggingface.co/datasets/scrapegraphai/scrapegraphai-100k"><img src="https://img.shields.io/badge/🤗%20Hugging%20Face-Dataset-yellow" alt="HuggingFace"/></a>
-  <a href="https://arxiv.org/abs/2505.04016"><img src="https://img.shields.io/badge/arXiv-2505.04016-b31b1b.svg" alt="arXiv"/></a>
+  <a href="https://huggingface.co/datasets/scrapegraphai/scrapegraph-100k-finetuning"><img src="https://img.shields.io/badge/🤗%20Hugging%20Face-Finetuning%20Dataset-yellow" alt="HuggingFace Finetuning"/></a>
+  <a href="https://arxiv.org/abs/2602.15189"><img src="https://img.shields.io/badge/arXiv-2602.15189-b31b1b.svg" alt="arXiv"/></a>
   <a href="https://github.com/ScrapeGraphAI/Scrapegraph-ai"><img src="https://img.shields.io/badge/GitHub-ScrapeGraphAI-blue" alt="GitHub"/></a>
   <img src="https://img.shields.io/badge/License-Apache%202.0-green.svg" alt="License"/>
 </p>
 
 <p align="center">
-  <b>100,000 real-world structured extraction examples from LLMs scraping the web</b>
+  <b>Reproducibility repository for "ScrapeGraphAI-100k: Dataset for Schema-Constrained LLM Generation"</b>
 </p>
 
 ---
 
 # Overview
 
+This repository contains the code behind the [ScrapeGraphAI-100k paper](https://arxiv.org/abs/2602.15189): dataset analysis scripts, evaluation metrics, the finetuning/distillation pipeline, the PII audit, and the LLM-judge pilot.
+
+The paper releases two datasets and a model:
+
+- **[scrapegraphai/scrapegraphai-100k](https://huggingface.co/datasets/scrapegraphai/scrapegraphai-100k)** — 93,695 real-world schema-constrained extraction events collected via opt-in telemetry of the [ScrapeGraphAI](https://github.com/ScrapeGraphAI/Scrapegraph-ai) library (Q2–Q3 2025), derived from ~9M raw events, deduplicated and balanced for schema diversity (25,453 unique schemas, 8,155 root domains). Each row holds the prompt, Markdown-converted page content, target JSON schema, LLM response, and metadata (model, latency, five schema-complexity metrics, and a structural `response_is_valid` flag — 96.5% of responses validate, invalid ones are retained for failure-mode research).
+- **[scrapegraphai/scrapegraph-100k-finetuning](https://huggingface.co/datasets/scrapegraphai/scrapegraph-100k-finetuning)** — a finetuning-ready derivative with `(schema, content, response)` triples: `train` (25,244 rows) and `test` (2,808 rows) with GPT-5-nano regenerated, schema-compliant targets (teacher pseudo-labels), plus a leak-free, human-verified `human_eval` split (100 rows) for semantic-correctness evaluation.
+- **[scrapegraphai/sgai-qwen3-1.7b](https://huggingface.co/scrapegraphai/sgai-qwen3-1.7b)** — Qwen3-1.7B finetuned on the finetuning dataset.
+
 ## Quick Start
 
 ```python
 from datasets import load_dataset
 
-dataset = load_dataset("scrapegraphai/scrapegraphai-100k")
-train_data = dataset['train']
+# Full corpus: prompts, content, schemas, responses, complexity metadata
+ds = load_dataset("scrapegraphai/scrapegraphai-100k")
 
-print(f"Dataset size: {len(train_data)}")
-print(train_data[0])
+# Finetuning derivative: train / test / human_eval splits
+ft = load_dataset("scrapegraphai/scrapegraph-100k-finetuning")
+print(ft["human_eval"][0])
 ```
+
+## Repository Structure
+
+| Path | Contents |
+|------|----------|
+| `modelling/` | Finetuning pipeline: preprocessing, training, evaluation, metrics, LoRA merge, quantization, HF push |
+| `scripts/` | Paper analysis: dataset statistics, domain diversity, frontier baselines, human benchmark, LLM-judge pilot, PII audit, figures (see [`scripts/README.md`](scripts/README.md)) |
+| `figures/`, `tables/` | Generated paper assets |
 
 ## Evaluation Metrics
 
-The `metric.py` module provides evaluation functions for JSON extraction tasks.
+The `modelling/metrics.py` module provides evaluation functions for JSON extraction tasks.
 
 ### JSON Validation
 
 Check if a JSON string is valid and complies with a schema:
 
 ```python
-from metric import json_validator
+from modelling.metrics import json_validator
 
 schema = {
     "type": "object",
@@ -57,7 +75,7 @@ result = json_validator('{"name": "John"}', schema)
 Evaluate extraction quality with `magic_metric`:
 
 ```python
-from metric import magic_metric, parse_json_remove_duplicates
+from modelling.metrics import magic_metric, parse_json_remove_duplicates
 
 pred = '{"name": "John", "age": 30, "tags": ["a", "b"]}'
 true = {"name": "john", "age": 30, "tags": ["b", "a"], "city": "NYC"}
@@ -97,7 +115,8 @@ uv pip install vllm
 
 - 🤗 [Hugging Face Dataset](https://huggingface.co/datasets/scrapegraphai/scrapegraphai-100k)
 - 🤗 [Hugging Face Dataset for Finetuning](https://huggingface.co/datasets/scrapegraphai/scrapegraph-100k-finetuning)
-- 📄 [arXiv Paper](TODO)
+- 🤗 [Finetuned Model (sgai-qwen3-1.7b)](https://huggingface.co/scrapegraphai/sgai-qwen3-1.7b)
+- 📄 [arXiv Paper](https://arxiv.org/abs/2602.15189)
 - 🕷️ [ScrapeGraphAI Library](https://github.com/ScrapeGraphAI/Scrapegraph-ai)
 
 ## Training (Modal)
@@ -128,16 +147,21 @@ python -m modelling.merge_lora \
 
 Saves to `sg-checkpoints/efficient-frost-76/merged` by default. Use `--output-path` to override.
 
-## Quantize (W4A16)
+## Quantize (Modal)
 
-Quantize the merged model to 4-bit weights for faster inference and lower VRAM usage. Uses GPTQ with calibration data from the training set:
+AWQ W4A16 (calibrated on the finetuning train split via llmcompressor):
 
 ```bash
-python -m modelling.quantize \
-  --model-path sg-checkpoints/efficient-frost-76/merged
+modal run modelling/convert_awq.py --lora-path /checkpoints/efficient-frost-76/final
+modal run modelling/convert_awq.py --model-path /checkpoints/efficient-frost-76/merged --push-to-hub
 ```
 
-Saves to `sg-checkpoints/efficient-frost-76/merged-w4a16`. Use `--output-path` to override.
+GGUF (llama.cpp, default quants `q4_k_m,q8_0`):
+
+```bash
+modal run modelling/convert_gguf.py --lora-path /checkpoints/efficient-frost-76/final
+modal run modelling/convert_gguf.py --model-path /checkpoints/efficient-frost-76/merged --quant q4_k_m --push-to-hub
+```
 
 ## Serve
 
@@ -181,15 +205,6 @@ vllm serve sg-checkpoints/efficient-frost-76/merged \
   --port 8000
 ```
 
-
-
-```bash
-vllm serve sg-checkpoints/efficient-frost-76/merged-w4a16 \
-  --max-model-len 8192 \
-  --gpu-memory-utilization 0.9 \
-  --enforce-eager \
-  --port 8000
-```
 With LoRA (without merging, slowest):
 
 ```bash
@@ -215,4 +230,18 @@ curl http://localhost:8000/v1/chat/completions \
     "repetition_penalty": 1.1,
     "chat_template_kwargs": {"enable_thinking": false}
   }'
+```
+
+## Citation
+
+```bibtex
+@misc{brach2026scrapegraphai100kdatasetschemaconstrainedllm,
+      title={ScrapeGraphAI-100k: Dataset for Schema-Constrained LLM Generation},
+      author={William Brach and Francesco Zuppichini and Marco Vinciguerra and Lorenzo Padoan},
+      year={2026},
+      eprint={2602.15189},
+      archivePrefix={arXiv},
+      primaryClass={cs.IR},
+      url={https://arxiv.org/abs/2602.15189},
+}
 ```
