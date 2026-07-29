@@ -34,7 +34,7 @@ uv run python scripts/frontier_baselines.py --model gpt-5-mini
 uv run python scripts/frontier_baselines.py --model gemini/gemini-2.5-flash --sample 500
 ```
 
-Flags: `--structured-mode json_schema|json_object|none`, `--sample N` (stratified, 0 = full set), `--concurrency`, `--seed`, `--max-new-tokens`, `--temperature` (omitted from requests by default), `--extra-body '<json>'` (forwarded verbatim, e.g. vLLM sampling params), `--no-length-filter`, `--resume` (continue an interrupted run from its JSONL).
+Flags: `--structured-mode json_schema|json_object|none`, `--sample N` (stratified, 0 = full set), `--concurrency`, `--seed`, `--max-new-tokens`, `--temperature` (omitted from requests by default), `--extra-body '<json>'` (forwarded verbatim, e.g. vLLM sampling params), `--no-length-filter`, `--resume` (continue an interrupted run from its JSONL), `--gold <gold.jsonl>` (evaluate only the human-benchmark rows; results get a `_gold` suffix so full-test-set runs are never clobbered — feed the JSONL to `human_benchmark.py score --results` for semantic correctness against human gold).
 
 Outputs: `sg-checkpoints/results/litellm_<model>.jsonl` (per-sample records), `litellm_<model>_summary.json`, `tables/frontier_<model>_by_complexity.md`.
 
@@ -45,6 +45,39 @@ Compares the raw dataset's original responses against the regenerated responses 
 ```sh
 uv run python scripts/regeneration_comparison.py
 ```
+
+## rejection_report.py
+
+Post-hoc schema-rejection accounting for a `frontier_baselines.py` run (reviewer follow-up on the Claude results). Reads the per-sample JSONL — no re-inference — and reports, per complexity bucket plus the depth/keys tails: total vs API-accepted counts, metrics over all completed calls (the paper's denominator: rejected schemas fall back to `json_object`, so every call is scored), accepted-only metrics, and a strict end-to-end metric that treats provider-side schema rejection as failure. Also prints the normalized top rejection causes parsed from the logged error strings and the run configuration from the sibling `_summary.json`. `--reference` takes another run's JSONL covering the full planned index set (e.g. the gpt run) to quantify coverage, an end-to-end metric that also counts never-completed calls as failure, and a coverage-sensitivity check (the reference model's metrics on its full set vs restricted to the indices this run completed — small deltas mean the covered subset is representative, so an incomplete run doesn't need resuming).
+
+```sh
+uv run python scripts/rejection_report.py --results sg-checkpoints/results/litellm_claude-sonnet-4.6-fiit.jsonl --reference sg-checkpoints/results/litellm_gpt-5.6-terra-fiit.jsonl
+```
+
+Flags: `--results` (required), `--reference`, `--top-causes N` (default 10).
+
+Outputs: `tables/rejection_report_<model>.md`.
+
+## rewrite_taxonomy.py
+
+Splits `regeneration_comparison.py`'s `chg_content_rewrite` class (reported in the rebuttal as "genuine re-extractions or paraphrases") into meaning-preserving rewrites vs substantive value changes. Three stages: `collect` rebuilds the aligned pairs, extracts every changed shared leaf classified as a content rewrite, and settles the deterministic cases (punctuation/diacritics/number/date formatting, list reorder, strict containment = truncation/completion); `judge` sends a random sample of the residual leaves to an LLM judge that labels each pair equivalent / partial / substantive / unclear (judgments are cached and resumable, error records retried); `analyze` combines heuristic counts with the extrapolated judged split into the final table.
+
+```sh
+uv run python scripts/rewrite_taxonomy.py collect
+uv run python scripts/rewrite_taxonomy.py judge --n-judge 1500
+uv run python scripts/rewrite_taxonomy.py analyze
+```
+
+The `sheet` stage is the zero-API alternative to `judge`: it writes the same seeded residual sample to `manual_sheet.csv` for hand-labeling (fill the `verdict` column with equivalent/partial/substantive/unclear); `analyze` merges labeled rows with any judge output, manual labels winning on conflict.
+
+```sh
+uv run python scripts/rewrite_taxonomy.py sheet --n-judge 200
+uv run python scripts/rewrite_taxonomy.py analyze
+```
+
+Stages: `collect`, `sheet`, `judge`, `analyze`, `all` (default = collect+judge+analyze). Flags: `--n-judge` (default 1500; also sizes the sheet), `--judge-model` (default `gpt-5.6-terra-fiit`), `--workers`, `--limit`, `--seed`.
+
+Outputs: working files in `.data/rewrite_taxonomy/` (leaves, judgments, manual sheet), `tables/rewrite_taxonomy.md`.
 
 ## llm_judge_pilot.py
 

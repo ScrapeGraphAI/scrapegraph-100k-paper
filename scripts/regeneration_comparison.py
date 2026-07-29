@@ -124,7 +124,12 @@ def leaf_stats(flat: dict) -> tuple[int, int, int]:
 
 
 def canonical(v) -> bytes:
-    return orjson.dumps(v, option=orjson.OPT_SORT_KEYS)
+    # metrics._flatten_dict marks empty dicts with a bare object() sentinel
+    # that orjson cannot serialize; any such value canonicalizes to a fixed
+    # marker so identical sentinels compare equal instead of crashing
+    return orjson.dumps(
+        v, option=orjson.OPT_SORT_KEYS, default=lambda _: "<unserializable>"
+    )
 
 
 MISSING_STRINGS = {"", "na", "n/a", "none", "null", "unknown", "-"}

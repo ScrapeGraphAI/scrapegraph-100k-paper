@@ -70,6 +70,9 @@ class FrontierEvalConfig:
     seed: int = 42
     length_filter: bool = True
     resume: bool = False
+    # path to a human_benchmark gold.jsonl: restrict inference to its test_idx
+    # rows (they already passed the length filter when sampled)
+    gold: str | None = None
 
 
 def bucket_for_score(score: float | None) -> str:
@@ -341,9 +344,14 @@ def prepare_rows(
     if unmatched:
         print(f"Warning: {unmatched} test schemas not found in raw dataset")
 
-    indices = (
-        length_filter_indices(ds) if config.length_filter else list(range(len(ds)))
-    )
+    if config.gold:
+        with open(config.gold) as f:
+            indices = sorted(json.loads(line)["test_idx"] for line in f)
+        print(f"Restricting to {len(indices)} gold rows from {config.gold}")
+    else:
+        indices = (
+            length_filter_indices(ds) if config.length_filter else list(range(len(ds)))
+        )
     buckets = {i: bucket_for_score(s["complexity"]) for i, s in stats.items()}
     indices = stratified_sample(indices, buckets, config.sample, config.seed)
     deep_count = sum(1 for i in indices if (stats[i]["depth"] or 0) >= DEPTH_THRESHOLD)
@@ -360,6 +368,8 @@ async def run_eval(config: FrontierEvalConfig):
 
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
     safe_model = re.sub(r"[^A-Za-z0-9._-]", "_", config.model_name)
+    if config.gold:
+        safe_model += "_gold"  # never clobber a full-test-set run
     jsonl_path = RESULTS_DIR / f"litellm_{safe_model}.jsonl"
 
     if config.resume:
@@ -478,6 +488,11 @@ def main():
         help="Skip the 8192-token prompt filter used by the vLLM eval",
     )
     parser.add_argument("--resume", action="store_true")
+    parser.add_argument(
+        "--gold",
+        default=None,
+        help="human_benchmark gold.jsonl: evaluate only its test_idx rows",
+    )
     args = parser.parse_args()
 
     config = FrontierEvalConfig(
@@ -493,6 +508,7 @@ def main():
         seed=args.seed,
         length_filter=not args.no_length_filter,
         resume=args.resume,
+        gold=args.gold,
     )
     print(f"Evaluating {config.model_name} via LiteLLM ({config.structured_mode})")
     asyncio.run(run_eval(config))
