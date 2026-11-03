@@ -1,0 +1,527 @@
+{
+  "@context": {
+    "@language": "en",
+    "@vocab": "https://schema.org/",
+    "arrayShape": "cr:arrayShape",
+    "citeAs": "cr:citeAs",
+    "column": "cr:column",
+    "conformsTo": "dct:conformsTo",
+    "containedIn": "cr:containedIn",
+    "cr": "http://mlcommons.org/croissant/",
+    "data": {
+      "@id": "cr:data",
+      "@type": "@json"
+    },
+    "dataBiases": "cr:dataBiases",
+    "dataCollection": "cr:dataCollection",
+    "dataType": {
+      "@id": "cr:dataType",
+      "@type": "@vocab"
+    },
+    "dct": "http://purl.org/dc/terms/",
+    "extract": "cr:extract",
+    "field": "cr:field",
+    "fileProperty": "cr:fileProperty",
+    "fileObject": "cr:fileObject",
+    "fileSet": "cr:fileSet",
+    "format": "cr:format",
+    "includes": "cr:includes",
+    "isArray": "cr:isArray",
+    "isLiveDataset": "cr:isLiveDataset",
+    "jsonPath": "cr:jsonPath",
+    "key": "cr:key",
+    "md5": "cr:md5",
+    "parentField": "cr:parentField",
+    "path": "cr:path",
+    "personalSensitiveInformation": "cr:personalSensitiveInformation",
+    "recordSet": "cr:recordSet",
+    "references": "cr:references",
+    "regex": "cr:regex",
+    "repeated": "cr:repeated",
+    "replace": "cr:replace",
+    "sc": "https://schema.org/",
+    "separator": "cr:separator",
+    "source": "cr:source",
+    "subField": "cr:subField",
+    "transform": "cr:transform",
+    "rai": "http://mlcommons.org/croissant/RAI/",
+    "prov": "http://www.w3.org/ns/prov#"
+  },
+  "@type": "sc:Dataset",
+  "distribution": [
+    {
+      "@type": "cr:FileObject",
+      "@id": "repo",
+      "name": "repo",
+      "description": "The Hugging Face git repository.",
+      "contentUrl": "https://huggingface.co/datasets/scrapegraphai/scrapegraphai-100k/tree/refs%2Fconvert%2Fparquet",
+      "encodingFormat": "git+https",
+      "sha256": "https://github.com/mlcommons/croissant/issues/80"
+    },
+    {
+      "@type": "cr:FileSet",
+      "@id": "parquet-files-for-config-default",
+      "containedIn": {
+        "@id": "repo"
+      },
+      "encodingFormat": "application/x-parquet",
+      "includes": "default/*/*.parquet"
+    }
+  ],
+  "recordSet": [
+    {
+      "@type": "cr:RecordSet",
+      "dataType": "cr:Split",
+      "key": {
+        "@id": "default_splits/split_name"
+      },
+      "@id": "default_splits",
+      "name": "default_splits",
+      "description": "Splits for the default config.",
+      "field": [
+        {
+          "@type": "cr:Field",
+          "@id": "default_splits/split_name",
+          "dataType": "sc:Text"
+        }
+      ],
+      "data": [
+        {
+          "default_splits/split_name": "train"
+        }
+      ]
+    },
+    {
+      "@type": "cr:RecordSet",
+      "@id": "default",
+      "description": "scrapegraphai/scrapegraphai-100k - 'default' subset",
+      "field": [
+        {
+          "@type": "cr:Field",
+          "@id": "default/split",
+          "dataType": "sc:Text",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "fileProperty": "fullpath"
+            },
+            "transform": {
+              "regex": "default/(?:partial-)?(train)/.+parquet$"
+            }
+          },
+          "references": {
+            "field": {
+              "@id": "default_splits/split_name"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/prompt",
+          "dataType": "sc:Text",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "prompt"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/schema",
+          "dataType": "sc:Text",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "schema"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/schema_hash",
+          "dataType": "sc:Text",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "schema_hash"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/response",
+          "dataType": "sc:Text",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "response"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/content",
+          "dataType": "sc:Text",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "content"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/llm_model",
+          "dataType": "sc:Text",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "llm_model"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/source",
+          "dataType": "sc:Text",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "source"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/execution_time",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "execution_time"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/response_size",
+          "dataType": "cr:Int64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "response_size"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/schema_size",
+          "dataType": "cr:Int64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "schema_size"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/schema_depth",
+          "dataType": "cr:Int64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "schema_depth"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/schema_keys",
+          "dataType": "cr:Int64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "schema_keys"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/schema_elements",
+          "dataType": "cr:Int64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "schema_elements"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/schema_cyclomatic_complexity",
+          "dataType": "cr:Int64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "schema_cyclomatic_complexity"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/schema_complexity_score",
+          "dataType": "cr:Float64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "schema_complexity_score"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/response_is_valid",
+          "dataType": "sc:Boolean",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "response_is_valid"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "default/id",
+          "dataType": "cr:Int64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-default"
+            },
+            "extract": {
+              "column": "id"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "conformsTo": "http://mlcommons.org/croissant/1.1",
+  "name": "scrapegraphai-100k",
+  "description": "93,695 real-world schema-constrained extraction events from opt-in telemetry of the ScrapeGraphAI open-source library (Q2-Q3 2025), deduplicated and balanced from ~9M raw events. Each row pairs a user prompt, a user-defined JSON schema, Markdown-converted page content and the LLM response, with model, latency, five schema-complexity metrics and a structural validity flag (jsonschema-rs). 25,453 unique schemas, 8,155 root domains.",
+  "alternateName": [
+    "scrapegraphai/scrapegraphai-100k",
+    "ScrapeGraphAI-100k"
+  ],
+  "creator": [
+    {
+      "@type": "Person",
+      "name": "William Brach",
+      "affiliation": {
+        "@type": "Organization",
+        "name": "Slovak University of Technology in Bratislava",
+        "url": "https://www.stuba.sk"
+      }
+    },
+    {
+      "@type": "Person",
+      "name": "Francesco Zuppichini",
+      "affiliation": {
+        "@type": "Organization",
+        "name": "ScrapeGraphAI",
+        "url": "https://scrapegraphai.com"
+      }
+    },
+    {
+      "@type": "Person",
+      "name": "Marco Vinciguerra",
+      "affiliation": {
+        "@type": "Organization",
+        "name": "ScrapeGraphAI",
+        "url": "https://scrapegraphai.com"
+      }
+    },
+    {
+      "@type": "Person",
+      "name": "Lorenzo Padoan",
+      "affiliation": {
+        "@type": "Organization",
+        "name": "ScrapeGraphAI",
+        "url": "https://scrapegraphai.com"
+      }
+    },
+    {
+      "@type": "Organization",
+      "name": "ScrapeGraphAI",
+      "url": "https://scrapegraphai.com"
+    }
+  ],
+  "keywords": [
+    "text-generation",
+    "text-classification",
+    "feature-extraction",
+    "English",
+    "Chinese",
+    "Korean",
+    "German",
+    "Dutch",
+    "Spanish",
+    "Italian",
+    "Danish",
+    "French",
+    "Swedish",
+    "Portuguese",
+    "apache-2.0",
+    "10K - 100K",
+    "Tabular",
+    "Text",
+    "arxiv:2505.04016",
+    "arxiv:2602.15189",
+    "🇺🇸 Region: US",
+    "agent",
+    "scraping",
+    "structured-output",
+    "json-schema",
+    "web-scraping"
+  ],
+  "license": "https://spdx.org/licenses/Apache-2.0.html",
+  "url": "https://huggingface.co/datasets/scrapegraphai/scrapegraphai-100k",
+  "version": "1.0.0",
+  "datePublished": "2025-12-12",
+  "publisher": {
+    "@type": "Organization",
+    "name": "ScrapeGraphAI",
+    "url": "https://huggingface.co/scrapegraphai"
+  },
+  "citeAs": "@misc{brach2026scrapegraphai100kdatasetschemaconstrainedllm,\n  title={ScrapeGraphAI-100k: Dataset for Schema-Constrained LLM Generation},\n  author={William Brach and Francesco Zuppichini and Marco Vinciguerra and Lorenzo Padoan},\n  year={2026},\n  eprint={2602.15189},\n  archivePrefix={arXiv},\n  primaryClass={cs.IR},\n  url={https://arxiv.org/abs/2602.15189}\n}",
+  "sameAs": [
+    "https://arxiv.org/abs/2602.15189",
+    "https://github.com/ScrapeGraphAI/scrapegraph-100k-paper"
+  ],
+  "rai:dataCollection": "Opt-in telemetry from the ScrapeGraphAI open-source scraping library (https://github.com/ScrapeGraphAI/Scrapegraph-ai), collected in Q2-Q3 2025. Users enable telemetry through an explicit configuration flag; events are sent to PostHog, configured to exclude user identifiers and personal data. Each event records one LLM extraction call: the user's prompt, the user-defined JSON schema, the Markdown-converted page content, the LLM response, the model name, the source URL and the latency. About 9M raw events were collected; the raw telemetry is not released. See the paper, sections 'Data Source and Collection' and 'Data Processing'.",
+  "rai:dataCollectionType": [
+    "Passive Data Collection",
+    "Web Scraping"
+  ],
+  "rai:dataPreprocessingProtocol": [
+    "Flattening: each telemetry event is flattened into (source URL, prompt, schema, Markdown content, response) plus metadata (model, latency).",
+    "Structural validation: every response is validated against its schema with jsonschema-rs. Raw-corpus validity was 93%; invalid responses are retained with response_is_valid=false to support failure-mode research.",
+    "Balancing and deduplication: events are grouped by SHA256 hash of the schema and at most 5 examples are kept per unique schema, each from a distinct root domain. Two schemas targeting high-traffic e-commerce sites alone accounted for ~5M of the 9M raw events.",
+    "Privacy: sensitive source URLs are domain-masked.",
+    "Complexity annotation: five structural complexity metrics per schema (depth, keys, elements, cyclomatic complexity, composite score), following SLOT (arXiv:2505.04016).",
+    "Result: 93,695 rows, 25,453 unique schemas, 10,295 hostnames across 8,155 root domains."
+  ],
+  "rai:dataAnnotationProtocol": "No human annotation. All labels are computed automatically: response_is_valid comes from jsonschema-rs structural validation (it certifies structure, not semantic correctness); schema-complexity metrics are computed programmatically; content language was identified with fastText (facebook/fasttext-language-identification) and PII was audited with openai/privacy-filter, both for documentation only.",
+  "rai:dataLimitations": [
+    "Structural validity is not semantic correctness: response values are LLM outputs, not human-verified ground truth, and a substantial fraction contain semantic errors. See the paper, sections 'Limitations' and 'Detailed Limitations' (appendix).",
+    "About 3.5% of rows fail validation because of upstream LLM errors (truncation, refusals), fetch-time failures surfaced in content (HTTP error pages, anti-bot challenges, CAPTCHAs), or non-textual pages (image galleries) where Markdown conversion yields little signal.",
+    "Snapshot of the web in Q2-Q3 2025; some URLs no longer resolve or have changed.",
+    "Markdown only: raw HTML/DOM is not redistributed, so the dataset does not support HTML- or DOM-level extraction research in v1.0.",
+    "No human-validated evaluation benchmark in v1.0 (a 100-example human_eval split exists in the companion fine-tuning dataset).",
+    "Not recommended for: use as a source of verified facts about websites, products or people; identifying or profiling individuals; use as a current snapshot of the web."
+  ],
+  "rai:dataBiases": [
+    "Model skew: gpt-4o-mini produced 87.4% of responses (gpt-4o 3.6%, gpt-4.1-mini 1.0%, ~1.1% unrecorded, long tail of 296 models), so response style and failure modes reflect that model family.",
+    "Language skew: English is ~89% of content with detectable language; the Traditional-Chinese share traces to two Hong Kong e-commerce sites. Most other languages are under 2.5% each.",
+    "Domain skew: coverage is heavy-tailed and e-commerce schemas remain over-represented even after schema-hash balancing; the top-10 root domains account for 44.2% of examples (amazon.com alone 10,155).",
+    "Selection bias: the data reflects ScrapeGraphAI users who opted into telemetry, which is a proxy for, not a sample of, LLM-based extraction workloads in general."
+  ],
+  "rai:personalSensitiveInformation": [
+    "Content comes from public web pages and can contain names, contact details and other personal data of people who appear on those pages. We audited every text field of all 93,695 rows with openai/privacy-filter. Rows with at least one detection: person name 48.8% (bylines, public figures, business owners), private URL 39.7%, secret/key 9.4%, account number 7.0%, date 6.3%, phone 6.2%, email 6.1%, address 4.6%. These are upper bounds; detections concentrate in the scraped content field.",
+    "No data about the ScrapeGraphAI users themselves: PostHog is configured to exclude user identifiers, and sensitive source URLs are domain-masked.",
+    "No intentional collection of sensitive categories (health, political or religious beliefs, etc.); such information can appear only incidentally in public page content.",
+    "Takedown: site owners and individuals can request removal via support@scrapegraphai.com or GitHub issues; requests are acknowledged within 24 hours and, if accepted, honored in a patch release within 30 days."
+  ],
+  "rai:dataUseCases": [
+    "Validated: benchmarking structural compliance of schema-constrained generation on real user-defined schemas, stratified by schema complexity (the paper reports sharp failure thresholds at depth >= 7 and keys >= 200).",
+    "Validated: training data for distilling small models into schema-constrained extractors (paper case study: a Qwen3-1.7B student fine-tuned on the derived fine-tuning set).",
+    "Supported: failure-mode analysis using the retained invalid responses and the complexity metadata.",
+    "Not validated: semantic extraction accuracy (labels are structural only) and schema induction from content (proposed, not evaluated).",
+    "Construct: the dataset measures whether LLM outputs conform to real practitioners' JSON schemas on real page content; it does not measure whether the extracted values are correct."
+  ],
+  "rai:dataSocialImpact": "Positive: an open, real-workload corpus for schema-constrained generation and for small, privately deployable extraction models. Negative: dual use, since the data can help build automated scraping agents; scraped content may be copyrighted or subject to website Terms of Service and robots.txt. Mitigations: the Apache-2.0 license covers only our derivative artifacts, not the underlying pages; raw HTML and exhaustive page reproductions are not redistributed; users must respect Terms of Service, robots.txt and applicable law; a takedown process is in place. The uplift over running the open-source library directly is modest. See the paper, sections 'Ethical Considerations' and 'Broader Impact'.",
+  "rai:hasSyntheticData": true,
+  "rai:dataReleaseMaintenancePlan": "Semantic versioning on the Hugging Face repository; this metadata describes tag v1.0. A longitudinal refresh from Q2-Q3 2026 telemetry is planned for Q4 2026. Takedown requests are honored in a patch release within 30 days and propagated to the fine-tuning dataset and all future versions. Issues and contributions: https://github.com/ScrapeGraphAI/scrapegraph-100k-paper",
+  "prov:wasDerivedFrom": [
+    {
+      "@id": "https://github.com/ScrapeGraphAI/Scrapegraph-ai",
+      "prov:label": "Opt-in PostHog telemetry of the ScrapeGraphAI open-source library (~9M raw events, Q2-Q3 2025, not released)"
+    }
+  ],
+  "prov:wasGeneratedBy": [
+    {
+      "@type": "prov:Activity",
+      "prov:label": "Data collection",
+      "description": "Opt-in telemetry events from ScrapeGraphAI library users worldwide, sent to PostHog with user identifiers excluded. Synthetic component: the response column holds outputs of the LLMs that users ran (87.4% gpt-4o-mini); prompts, schemas and page content are real user inputs.",
+      "prov:startedAtTime": "2025-04-01",
+      "prov:endedAtTime": "2025-09-30",
+      "prov:wasAssociatedWith": [
+        {
+          "@type": "prov:Agent",
+          "prov:label": "ScrapeGraphAI open-source library users (opt-in)"
+        },
+        {
+          "@type": "prov:Agent",
+          "prov:label": "PostHog (telemetry platform)"
+        }
+      ]
+    },
+    {
+      "@type": "prov:Activity",
+      "prov:label": "Preprocessing",
+      "description": "Flattening, jsonschema-rs validation, SHA256 schema-hash balancing (max 5 per schema, distinct root domains), domain masking of sensitive URLs. See rai:dataPreprocessingProtocol and the paper, section 'Data Processing'.",
+      "prov:wasAssociatedWith": [
+        {
+          "@type": "prov:Agent",
+          "prov:label": "ScrapeGraphAI-100k authors"
+        }
+      ]
+    },
+    {
+      "@type": "prov:Activity",
+      "prov:label": "Automatic annotation",
+      "description": "Structural validity flag (jsonschema-rs) and five SLOT schema-complexity metrics, computed programmatically. No human annotators.",
+      "prov:wasAssociatedWith": [
+        {
+          "@type": "prov:SoftwareAgent",
+          "prov:label": "jsonschema-rs"
+        }
+      ]
+    }
+  ]
+}
