@@ -1,0 +1,81 @@
+{
+  "rai:dataCollection": "No new collection. Derived from ScrapeGraphAI-100k tag v1.0 (https://huggingface.co/datasets/scrapegraphai/scrapegraphai-100k), which comes from opt-in telemetry of the ScrapeGraphAI open-source library in Q2-Q3 2025.",
+  "rai:dataCollectionType": [
+    "Secondary Data Analysis"
+  ],
+  "rai:dataPreprocessingProtocol": [
+    "Filtering: drop examples with content > 50k, schema > 10k or response > 10k characters.",
+    "Chunking: split long content into ~4,096-token windows with 128-token overlap (3.5 characters per token).",
+    "Splitting: 90/10 train/test with fixed seed 42.",
+    "Target regeneration: original telemetry responses are replaced with GPT-5-nano (gpt-5-nano-2025-08-07) extractions; regenerations that fail jsonschema validation are discarded, so every train/test target is schema-compliant by construction.",
+    "Code: modelling/preprocess.py and modelling/regenerate.py in https://github.com/ScrapeGraphAI/scrapegraph-100k-paper"
+  ],
+  "rai:dataAnnotationProtocol": "train/test targets are automatic GPT-5-nano pseudo-labels, not human-verified. The human_eval split (100 examples, drawn from test) is human-annotated by the paper's authors: it is leak-free by construction (no train chunk from the same page, identical chunk, or identical (schema, response) pair), stratified over schema-complexity buckets x full-page vs truncated content, and annotators started from the GPT-5-nano draft and verified or corrected every leaf value against the shown content only (absent values nulled, hallucinated values removed). Annotators edited the draft in 77% of examples, changing 31.7% of leaf values. Protocol and tooling: scripts/human_benchmark.py.",
+  "rai:dataLimitations": [
+    "train/test targets are GPT-5-nano pseudo-labels: metrics on them measure agreement with the teacher, not extraction correctness. Use human_eval (n=100) for semantic correctness.",
+    "Validation is structural (jsonschema), not semantic.",
+    "human_eval is small (100 examples) and is contained in test; using it for training or checkpoint selection contaminates the test split.",
+    "Inherits the parent corpus's limitations: Q2-Q3 2025 web snapshot, Markdown only, usage-derived heavy-tailed domain coverage.",
+    "Not recommended for: use as a source of verified facts, or for profiling individuals."
+  ],
+  "rai:dataBiases": [
+    "Teacher bias: targets reflect GPT-5-nano's extraction behaviour and errors; students trained on them inherit it.",
+    "Inherited from the parent corpus: English-dominant content, e-commerce-heavy schemas, top-10 root domains ~44% of parent-corpus examples, opt-in user population.",
+    "Length filtering removes the largest schemas, pages and responses, under-representing the most complex extraction cases."
+  ],
+  "rai:personalSensitiveInformation": [
+    "content is derived from public web pages and may contain names and business contact details of people appearing on those pages (see the parent corpus's PII audit). Do not use this dataset to profile individuals.",
+    "No data about ScrapeGraphAI users: user identifiers were excluded at collection time.",
+    "Takedown: open an issue at https://github.com/ScrapeGraphAI/scrapegraph-100k-paper/issues or email support@scrapegraphai.com with the row's schema/content excerpt."
+  ],
+  "rai:dataUseCases": [
+    "Validated: fine-tuning/distilling small models for schema-constrained extraction (train); the paper's Qwen3-1.7B student closely tracks the GPT-5-nano teacher's output distribution.",
+    "Validated: benchmarking structural schema compliance and key-level metrics (test).",
+    "Supported: evaluating semantic extraction correctness against human gold (human_eval), with a small sample size.",
+    "Construct: train/test measure agreement with a teacher model under real user schemas; only human_eval measures correctness."
+  ],
+  "rai:dataSocialImpact": "Enables small, privately deployable extraction models instead of large proprietary APIs. Same dual-use considerations as the parent corpus: it can improve automated scraping agents, so users must respect website Terms of Service, robots.txt, copyright and applicable law; the license covers only our derivative artifacts, and a takedown process is in place.",
+  "rai:hasSyntheticData": true,
+  "rai:dataReleaseMaintenancePlan": "Semantic versioning on the Hugging Face repository: v1.0 = train/test, v1.1 = adds human_eval. This metadata describes v1.1. Takedowns accepted on the parent corpus are propagated here.",
+  "prov:wasDerivedFrom": [
+    {
+      "@id": "https://huggingface.co/datasets/scrapegraphai/scrapegraphai-100k",
+      "prov:label": "ScrapeGraphAI-100k v1.0"
+    }
+  ],
+  "prov:wasGeneratedBy": [
+    {
+      "@type": "prov:Activity",
+      "prov:label": "Preprocessing",
+      "description": "Length filtering, ~4,096-token chunking with 128-token overlap, 90/10 split (seed 42). Code: modelling/preprocess.py.",
+      "prov:wasAssociatedWith": [
+        {
+          "@type": "prov:Agent",
+          "prov:label": "ScrapeGraphAI-100k authors"
+        }
+      ]
+    },
+    {
+      "@type": "prov:Activity",
+      "prov:label": "Synthetic target generation",
+      "description": "train/test targets regenerated with GPT-5-nano (gpt-5-nano-2025-08-07) via the OpenAI Batch API, given the schema and content chunk; outputs failing jsonschema validation are discarded. Code and prompt: modelling/regenerate.py, modelling/prompts.py.",
+      "prov:wasAssociatedWith": [
+        {
+          "@type": "prov:SoftwareAgent",
+          "prov:label": "OpenAI gpt-5-nano-2025-08-07"
+        }
+      ]
+    },
+    {
+      "@type": "prov:Activity",
+      "prov:label": "Human annotation (human_eval)",
+      "description": "100 test examples, leak-free and stratified; annotators verified/corrected every leaf value of the GPT-5-nano draft against the shown content only. Code: scripts/human_benchmark.py.",
+      "prov:wasAssociatedWith": [
+        {
+          "@type": "prov:Agent",
+          "prov:label": "ScrapeGraphAI-100k authors (human annotators)"
+        }
+      ]
+    }
+  ]
+}

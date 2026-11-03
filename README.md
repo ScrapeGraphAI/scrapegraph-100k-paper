@@ -48,6 +48,22 @@ print(ft["human_eval"][0])
 | `modelling/` | Finetuning pipeline: preprocessing, training, evaluation, metrics, LoRA merge, quantization, HF push |
 | `scripts/` | Paper analysis: dataset statistics, domain diversity, frontier baselines, human benchmark, LLM-judge pilot, PII audit, figures (see [`scripts/README.md`](scripts/README.md)) |
 | `figures/`, `tables/` | Generated paper assets |
+| `croissant/` | Croissant metadata (core + Responsible AI fields) for both datasets, as required by the NeurIPS 2026 E&D track |
+
+## Croissant Metadata
+
+`croissant/build.py` takes the Croissant file Hugging Face generates for each dataset (core fields), merges in the Responsible AI and provenance fields from `croissant/rai/<dataset>.json`, and validates the result with `mlcroissant`:
+
+```sh
+uv run croissant/build.py            # build + validate metadata
+uv run croissant/build.py --records  # also load one record per record set (downloads the parquet)
+```
+
+Outputs: `croissant/scrapegraphai-100k.croissant.json`, `croissant/scrapegraph-100k-finetuning.croissant.json`. To change any RAI text, edit `croissant/rai/*.json` and rebuild.
+
+## License
+
+Code in this repository and both datasets are released under [Apache 2.0](LICENSE). The dataset license covers the derivative artifacts (Markdown content, prompts, schemas, responses, metadata), not the underlying web pages.
 
 ## Evaluation Metrics
 
